@@ -15,6 +15,8 @@ import {
   isAuthorizedAndNotDeprecated,
   isAuthorizedMethod
 } from "./view-data/operation";
+import { convertOpenApiToSwagger } from "./transform/convertOpenApiToSwaggeri";
+import { OpenApi } from "./swagger/Openapi";
 
 export type GenerationTargetType = "typescript" | "custom";
 
@@ -34,7 +36,9 @@ export interface ViewData {
 }
 
 export function getViewForSwagger2(opts: CodeGenOptions): ViewData {
-  const swagger = opts.swagger;
+  const swagger = opts.isV2
+    ? (opts.swagger as Swagger)
+    : convertOpenApiToSwagger(opts.swagger as OpenApi);
 
   const data: ViewData = {
     isES6: opts.isES6,

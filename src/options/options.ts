@@ -1,6 +1,7 @@
 import { HttpOperation, Swagger } from "../swagger/Swagger";
 import { DEFAULT_OPTIONS } from "./default";
 import * as prettier from "prettier";
+import { OpenApi } from "../swagger/Openapi";
 
 export interface TemplateLocationsOptional extends Partial<TemplateLocations> {}
 
@@ -16,6 +17,7 @@ export interface TemplateLocations {
 }
 
 export interface Options {
+  readonly isV2: boolean;
   readonly isES6: boolean;
   readonly includeDeprecated: boolean;
   readonly imports: ReadonlyArray<string>;
@@ -28,7 +30,7 @@ export interface Options {
 }
 
 interface SwaggerOption {
-  readonly swagger: Swagger;
+  readonly swagger: Swagger | OpenApi;
 }
 
 // This is the internal interface we use to reference to the full Options object with defaults

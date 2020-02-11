@@ -8,9 +8,11 @@ import { transformToCodeWithMustache } from "./transform/transformToCodeWithMust
 import { enhanceCode } from "./enhance";
 
 function getCode(opts: CodeGenOptions): string {
-  verifyThatWeAreGeneratingForSwagger2(opts);
+  const isV2 = verifyThatWeAreGeneratingForSwagger2(opts);
 
-  const data = getViewForSwagger2(opts);
+  const data = isV2
+    ? getViewForSwagger2({ ...opts, isV2 })
+    : getViewForSwagger2({ ...opts, isV2 });
   return transformToCodeWithMustache(data, opts.template, opts.hbsContext);
 }
 
@@ -30,8 +32,6 @@ export const CodeGen = {
   }
 };
 
-function verifyThatWeAreGeneratingForSwagger2(opts: CodeGenOptions): void {
-  if (opts.swagger.swagger !== "2.0") {
-    throw new Error("Only Swagger 2 specs are supported");
-  }
+function verifyThatWeAreGeneratingForSwagger2(opts: CodeGenOptions): boolean {
+  return opts.swagger.swagger ? opts.swagger.swagger === "2.0" : false;
 }

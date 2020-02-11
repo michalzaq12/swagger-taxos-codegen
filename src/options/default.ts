@@ -10,6 +10,7 @@ import { HttpOperation } from "../swagger/Swagger";
 const DEFAULT_TEMPLATE_PATH = join(__dirname, "..", "..", "templates");
 
 export const DEFAULT_OPTIONS: Options = {
+  isV2: true,
   isES6: false,
   imports: [],
   includeDeprecated: false,
