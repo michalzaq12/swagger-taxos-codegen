@@ -1,4 +1,3 @@
-import * as _ from "lodash";
 import { Swagger, SwaggerType } from "./swagger/Swagger";
 import { makeObjectTypeSpec } from "./type-mappers/object";
 import { makeReferenceTypeSpec, isReference } from "./type-mappers/reference";
