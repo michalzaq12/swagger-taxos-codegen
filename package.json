@@ -4,13 +4,8 @@
   "version": "2.1.2",
   "description": "A Swagger Codegenerator tailored for typescript - based on axios.",
   "scripts": {
-    "pretest": "npm run build",
-    "test": "grunt && jest",
-    "clean": "rm -rf tmp-*",
-    "build": "tsc --project tsconfig.json",
+    "build": "tsc",
     "build:watch": "npm run build -- --watch",
-    "test:watch": "jest --watch",
-    "prepublishOnly": "npm run build",
     "prettier": "prettier --write \"src/**/*.ts\""
   },
   "bin": {
@@ -38,34 +33,19 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/michalzaq12/swagger-taxos-codegen",
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "*",
     "commander": "^2.19.0",
     "handlebars": "^4.1.1",
     "handlebars-helpers": "^0.10.0",
-    "jshint": "^2.9.7",
     "lodash": "^4.17.11",
-    "update-notifier": "^2.5.0",
     "prettier": "1.15.3"
   },
   "devDependencies": {
-    "@types/commander": "^2.12.2",
     "@types/handlebars-helpers": "^0.5.2",
-    "@types/jest": "^23.3.10",
     "@types/lodash": "^4.14.119",
     "@types/mustache": "^0.8.32",
     "@types/node": "^10.12.18",
     "@types/prettier": "^1.16.1",
-    "final-fs": "^1.6.0",
-    "grunt": "^1.0.3",
-    "grunt-contrib-jshint": "^2.0.0",
-    "grunt-jsonlint": "^1.0.4",
-    "grunt-vows": "^0.4.1",
-    "jest": "^23.6.0",
-    "matchdep": "^2.0.0",
-    "request": "^2.88.0",
-    "superagent": "^4.0.0",
-    "tmp": "0.0.33",
-    "typescript": "^3.2.2",
-    "vows": "^0.8.2"
+    "typescript": "^3.2.2"
   }
 }
