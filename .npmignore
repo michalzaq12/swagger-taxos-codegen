@@ -1,7 +1,0 @@
-.git*
-test/
-.DS_Store
-*.swp
-src/
-coverage/
-yarn-error.log
