@@ -57,7 +57,6 @@ function loadTemplates(templateLocations: TemplateLocations): Templates {
     main: loadTemplate(templateLocations.main),
     method: loadTemplate(templateLocations.method),
     methodSignature: loadTemplate(templateLocations.methodSignature),
-    jsdoc: loadTemplate(templateLocations.jsdoc),
     parameter: loadTemplate(templateLocations.parameter),
     type: loadTemplate(templateLocations.type),
     interface: loadTemplate(templateLocations.interface),

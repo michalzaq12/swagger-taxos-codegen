@@ -11,7 +11,6 @@ export interface TemplateLocations {
   readonly type: string;
   readonly interface: string;
   readonly parameter: string;
-  readonly jsdoc: string;
   readonly [key: string]: string;
 }
 

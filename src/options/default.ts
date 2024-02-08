@@ -19,8 +19,7 @@ export const DEFAULT_OPTIONS: Options = {
     methodSignature: join(DEFAULT_TEMPLATE_PATH, "methodSignature.hbs"),
     type: join(DEFAULT_TEMPLATE_PATH, "type.hbs"),
     interface: join(DEFAULT_TEMPLATE_PATH, "interface.hbs"),
-    parameter: join(DEFAULT_TEMPLATE_PATH, "parameter.hbs"),
-    jsdoc: join(DEFAULT_TEMPLATE_PATH, "jsdoc.hbs")
+    parameter: join(DEFAULT_TEMPLATE_PATH, "parameter.hbs")
   },
   formatCode: true,
   hbsContext: {},
