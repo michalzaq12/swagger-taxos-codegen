@@ -1,6 +1,7 @@
 # Swagger to Typescript Codegen
 
-[![Build Status](https://travis-ci.org/michalzaq12/swagger-taxos-codegen.svg?branch=master)](https://travis-ci.org/michalzaq12/swagger-taxos-codegen)
+[![Build Status](https://travis-ci.org/michalzaq12/swagger-taxos-codegen.svg?branch=master)](https://travis-ci.org/michalzaq12/swagger-taxos-codegen)
+
 [![npm version](https://badge.fury.io/js/swagger-taxos-codegen.svg)](https://badge.fury.io/js/swagger-taxos-codegen)
 
 This package generates a TypeScript class from a [swagger specification file](https://github.com/wordnik/swagger-spec).
@@ -72,10 +73,6 @@ const tsSourceCode = CodeGen.generateCode({
   getMethodName: (op, httpVerb, path) => op.summary
 });
 ```
-
-### Generated code API
-
-![](examples/gif1.gif)
 
 - **Basic**
 
