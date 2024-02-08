@@ -34,7 +34,6 @@
   "homepage": "https://github.com/michalzaq12/swagger-taxos-codegen",
   "dependencies": {
     "axios": "*",
-    "commander": "^2.19.0",
     "handlebars": "^4.1.1",
     "handlebars-helpers": "^0.10.0",
     "lodash": "^4.17.21",
