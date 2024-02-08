@@ -10,11 +10,11 @@ const DEFAULT_PRETTIER_OPTIONS: Options = {
 
 export type BeautifyOptions = Options;
 
-export function beautifyCode(
+export async function beautifyCode(
   formatCode: boolean,
   source: string,
   options: BeautifyOptions = {}
-): string {
+){
   if (formatCode) {
     return format(source, defaults(options, DEFAULT_PRETTIER_OPTIONS));
   }

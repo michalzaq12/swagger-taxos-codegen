@@ -38,14 +38,13 @@
     "handlebars": "^4.1.1",
     "handlebars-helpers": "^0.10.0",
     "lodash": "^4.17.11",
-    "prettier": "1.15.3"
+    "prettier": "3.2.5"
   },
   "devDependencies": {
     "@types/handlebars-helpers": "^0.5.2",
     "@types/lodash": "^4.14.119",
     "@types/mustache": "^0.8.32",
     "@types/node": "^10.12.18",
-    "@types/prettier": "^1.16.1",
     "typescript": "^3.2.2"
   }
 }
