@@ -43,7 +43,6 @@
   "devDependencies": {
     "@types/handlebars-helpers": "^0.5.2",
     "@types/lodash": "^4.14.119",
-    "@types/mustache": "^0.8.32",
     "@types/node": "^10.12.18",
     "typescript": "^3.2.2"
   }
