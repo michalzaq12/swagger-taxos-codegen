@@ -43,6 +43,6 @@
     "@types/handlebars-helpers": "^0.5.2",
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.11.16",
-    "typescript": "^3.2.2"
+    "typescript": "^5.3.3"
   }
 }
