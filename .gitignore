@@ -1,12 +1,2 @@
 .idea/
 node_modules/
-*.iml
-wks.*
-.DS_Store
-*.swp
-
-tmp-*
-
-lib/
-coverage/
-yarn-error.log
