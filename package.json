@@ -33,7 +33,6 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/michalzaq12/swagger-taxos-codegen",
   "dependencies": {
-    "axios": "*",
     "handlebars": "^4.1.1",
     "handlebars-helpers": "^0.9.8",
     "lodash": "^4.17.21",
@@ -44,5 +43,8 @@
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.11.16",
     "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "axios": "*"
   }
 }
