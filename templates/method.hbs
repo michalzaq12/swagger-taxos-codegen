@@ -1,4 +1,4 @@
-{{> methodSignature}}{
+${{> methodSignature}}{
 
     {{#equalsLength parameters 1}}
         let path = `{{pathTemplate}}`;
@@ -23,7 +23,7 @@
         {{/equalsLength}}
     {{/isEmpty}}
 
-    return axios.request({
+    return httpClient.request({
         url: path,
         method: '{{method}}',
         params: queryParams,
@@ -31,8 +31,4 @@
         ...config
     })
 
-},
-
-${{> methodSignature}}{
-    return this.{{> methodSignature}}.then(res => res && res.data)
 },

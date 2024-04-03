@@ -1,6 +1,4 @@
 /* eslint-disable */
-import type { AxiosPromise, AxiosInstance, AxiosRequestConfig } from 'axios'
-import Axios from 'axios';
 
 {{#each definitions}}
     {{#if tsType.isAtomic}}
@@ -10,14 +8,17 @@ import Axios from 'axios';
     {{/if}}
 {{/each}}
 
+
+{{> httpClient}}
+
 function setParam(distObject : any, key : string, param : any){
     if(param !== undefined) distObject[key] = param;
 }
 
-export function createApi(axios : AxiosInstance = Axios.create({baseURL: '{{domain}}'})): ApiInstance{
-
+export function createApi(options: IHttpClientOptions): ApiInstance {
+    const httpClient = createHttpClient(options);
     return {
-        $axios: axios,
+        $httpClient: httpClient,
         {{#each methodsByTag}}
             {{@key}} : {
             {{#each this}}
@@ -33,7 +34,9 @@ export function createApi(axios : AxiosInstance = Axios.create({baseURL: '{{doma
 }
 
 interface Core {
-    $axios: AxiosInstance
+    $httpClient: {
+        request: (config: IApiRequestConfig) => Promise< any >
+    }
 }
 
 

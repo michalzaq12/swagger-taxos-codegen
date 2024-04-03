@@ -11,6 +11,7 @@ export interface TemplateLocations {
   readonly type: string;
   readonly interface: string;
   readonly parameter: string;
+  readonly httpClient: string;
   readonly [key: string]: string;
 }
 

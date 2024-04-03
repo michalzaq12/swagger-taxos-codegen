@@ -60,6 +60,7 @@ function loadTemplates(templateLocations: TemplateLocations): Templates {
     parameter: loadTemplate(templateLocations.parameter),
     type: loadTemplate(templateLocations.type),
     interface: loadTemplate(templateLocations.interface),
+    httpClient: loadTemplate(templateLocations.httpClient),
     ...customTemplates
   };
 }

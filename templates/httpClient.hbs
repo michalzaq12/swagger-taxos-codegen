@@ -1,0 +1,114 @@
+
+export interface IApiRequestConfig {
+url: string
+method: string
+headers?: {
+[key: string]: string
+}
+params?: {
+[key: string]: string
+}
+data?: object | FormData
+signal?: AbortSignal
+// Pass custom vars to request or error handler (not used by fetch)
+custom?: {
+[key: string]: string | boolean | number
+}
+}
+
+
+function fetchV2(config: IApiRequestConfig) {
+
+const url = new URL(config.url);
+if (config.params) {
+for (const [key,value] of Object.entries(config.params)) {
+// Skip invalid query params
+if (value !== undefined && value !== '' && value !== null) url.searchParams.set(key, value);
+}
+}
+
+const myHeaders = new Headers();
+if (config.headers) {
+for (const [key,value] of Object.entries(config.headers)) {
+myHeaders.append(key, value)
+}
+}
+
+let data : undefined | string | FormData = undefined
+if (config.method.toLowerCase() !== 'get') {
+if (config.data && config.data instanceof FormData) {
+// Form Data
+myHeaders.append('Content-Type', 'multipart/form-data')
+data = config.data
+} else if (config.data && Object.keys(config.data).length > 0) {
+// Object (but not empty)
+myHeaders.append('Content-Type', 'application/json')
+data = JSON.stringify(config.data)
+}
+}
+
+return fetch(url, {
+method: config.method,
+headers: myHeaders,
+signal: config.signal,
+body: data,
+cache: 'no-store'
+})
+}
+
+// NOTE: In future replace with AbortSignal.any (Chrome 116+, no Safari)
+function anySignal(signals: AbortSignal[]): AbortSignal | undefined {
+if (signals.length === 0) return undefined
+const controller = new AbortController();
+
+for (const signal of signals) {
+if (signal.aborted) {
+controller.abort();
+return signal;
+}
+
+signal.addEventListener("abort", () => controller.abort(signal.reason), {
+signal: controller.signal,
+});
+}
+
+return controller.signal;
+}
+
+export interface IHttpClientOptions {
+baseURL: string
+timeout: number
+beforeRequest?: (config: IApiRequestConfig) => Promise<IApiRequestConfig>
+    afterNotOkResponse: (res: Response | Error, config: IApiRequestConfig) => Promise<Error>
+    }
+
+    function createHttpClient (options: IHttpClientOptions) {
+    return {
+    async request(config: IApiRequestConfig) {
+    const signals : AbortSignal[]  = []
+    let timeoutId : any = undefined
+    // Use native timeout when available (Chrome 103+)
+    if (typeof AbortSignal.timeout === 'function') signals.push(AbortSignal.timeout(options.timeout))
+    else {
+    const timeoutController = new AbortController();
+    signals.push(timeoutController.signal)
+    timeoutId = setTimeout(timeoutController.abort, options.timeout);
+    }
+    if (config.signal) signals.push(config.signal)
+    config.signal = anySignal(signals)
+    config.url = options.baseURL + config.url
+    const newConfig = options.beforeRequest ? await options.beforeRequest(config) : config
+    try {
+    const res = await fetchV2(newConfig)
+    if (timeoutId) clearTimeout(timeoutId)
+    if (!res.ok) return Promise.reject(await options.afterNotOkResponse(res, newConfig))
+    const contentType = res.headers.get('Content-Type')
+    if (contentType && contentType.includes('application/json')) return res.json()
+    else return res.text()
+    } catch (err: any) {
+    if (timeoutId) clearTimeout(timeoutId)
+    throw await options.afterNotOkResponse(err, newConfig)
+    }
+    }
+    }
+    }
