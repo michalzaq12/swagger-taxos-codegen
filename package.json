@@ -1,15 +1,12 @@
 {
   "name": "swagger-taxos-codegen",
   "main": "./lib/codegen.js",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "A Swagger Codegenerator tailored for typescript - based on axios.",
   "scripts": {
     "build": "tsc",
     "build:watch": "npm run build -- --watch",
     "prettier": "prettier --write \"src/**/*.ts\""
-  },
-  "bin": {
-    "taxos": "bin/taxos.js"
   },
   "bugs": {
     "url": "https://github.com/michalzaq12/swagger-taxos-codegen/issues"
@@ -18,14 +15,6 @@
     "type": "git",
     "url": "git://github.com/michalzaq12/swagger-taxos-codegen.git"
   },
-  "keywords": [
-    "swagger",
-    "rest",
-    "axios",
-    "typescript",
-    "codegen",
-    "openapi"
-  ],
   "author": {
     "name": "Michał Zarach",
     "email": "michal.m.zarach@gmail.com"
@@ -43,8 +32,5 @@
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.11.16",
     "typescript": "^5.3.3"
-  },
-  "peerDependencies": {
-    "axios": "*"
   }
 }
