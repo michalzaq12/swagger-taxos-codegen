@@ -102,9 +102,12 @@ function createHttpClient (options: IHttpClientOptions) {
                 const res = await fetchV2(newConfig)
                 if (timeoutId) clearTimeout(timeoutId)
                 if (!res.ok) return Promise.reject(await options.afterNotOkResponse(res, newConfig))
-                const contentType = res.headers.get('Content-Type')
-                if (contentType && contentType.includes('application/json')) return res.json()
-                else return res.text()
+                const resContentLength = res.headers.get('Content-Length')
+                const resContentType = res.headers.get('Content-Type');
+                // 'Content-Length' is not always exposed (e.g. when 'Transfer-Encoding': 'chunked')
+                if (resContentLength && resContentLength === '0') return undefined
+                else if (resContentType && resContentType.includes('application/json')) return res.json();
+                else return res.text();
             } catch (err: any) {
                 if (timeoutId) clearTimeout(timeoutId)
                 throw await options.afterNotOkResponse(err, newConfig)
