@@ -18,10 +18,9 @@ export interface IApiRequestConfig {
 
 
 function fetchV2(config: IApiRequestConfig) {
-
     const url = new URL(config.url);
     if (config.params) {
-        for (const [key,value] of Object.entries(config.params)) {
+        for (const [key, value] of Object.entries(config.params)) {
             // Skip invalid query params
             if (value !== undefined && value !== '' && value !== null) url.searchParams.set(key, value);
         }
@@ -29,12 +28,12 @@ function fetchV2(config: IApiRequestConfig) {
 
     const myHeaders = new Headers();
     if (config.headers) {
-        for (const [key,value] of Object.entries(config.headers)) {
+        for (const [key, value] of Object.entries(config.headers)) {
             myHeaders.append(key, value)
         }
     }
 
-    let data : undefined | string | FormData = undefined
+    let data: undefined | string | FormData = undefined
     if (config.method.toLowerCase() !== 'get') {
         if (config.data && config.data instanceof FormData) {
             // Form Data
@@ -58,7 +57,7 @@ function fetchV2(config: IApiRequestConfig) {
 
 // NOTE: In future replace with AbortSignal.any (Chrome 116+, no Safari)
 function anySignal(signals: AbortSignal[]): AbortSignal | undefined {
-    if (signals.length === 0) return undefined
+    if (signals.length === 0) return undefined;
     const controller = new AbortController();
 
     for (const signal of signals) {
@@ -67,12 +66,26 @@ function anySignal(signals: AbortSignal[]): AbortSignal | undefined {
             return signal;
         }
 
-        signal.addEventListener("abort", () => controller.abort(signal.reason), {
+        signal.addEventListener('abort', () => controller.abort(signal.reason), {
             signal: controller.signal,
         });
     }
 
     return controller.signal;
+}
+
+function getTimeoutSignal (timeout: number) {
+    // Use native fetch timeout when available (Chrome 103+)
+    if (typeof AbortSignal.timeout === 'function') return {timeoutSignal: AbortSignal.timeout(timeout)};
+    else {
+        const timeoutController = new AbortController();
+        const timeoutError = new Error(`Timeout of ${timeout}ms exceeded`)
+        timeoutError.name = 'TimeoutError'
+        return {
+            timeoutSignal: timeoutController.signal,
+            timeoutId: setTimeout(() => timeoutController.abort(timeoutError), timeout)
+        }
+    }
 }
 
 export interface IHttpClientOptions {
@@ -82,36 +95,27 @@ export interface IHttpClientOptions {
     afterNotOkResponse: (res: Response | Error, config: IApiRequestConfig) => Promise<Error>
 }
 
-function createHttpClient (options: IHttpClientOptions) {
+function createHttpClient(options: IHttpClientOptions) {
     return {
         async request(config: IApiRequestConfig) {
-            const signals : AbortSignal[]  = []
-            let timeoutId : any = undefined
-            // Use native timeout when available (Chrome 103+)
-            if (typeof AbortSignal.timeout === 'function') signals.push(AbortSignal.timeout(options.timeout))
-            else {
-                const timeoutController = new AbortController();
-                signals.push(timeoutController.signal)
-                timeoutId = setTimeout(timeoutController.abort, options.timeout);
-            }
-            if (config.signal) signals.push(config.signal)
-            config.signal = anySignal(signals)
-            config.url = options.baseURL + config.url
-            const newConfig = options.beforeRequest ? await options.beforeRequest(config) : config
+            config.url = options.baseURL + config.url;
+            const newConfig = options.beforeRequest ? await options.beforeRequest(config) : config;
+            const {timeoutSignal, timeoutId} = getTimeoutSignal(options.timeout)
+            config.signal = config.signal ? anySignal([config.signal, timeoutSignal]) : timeoutSignal;
             try {
-                const res = await fetchV2(newConfig)
-                if (timeoutId) clearTimeout(timeoutId)
-                if (!res.ok) return Promise.reject(await options.afterNotOkResponse(res, newConfig))
-                const resContentLength = res.headers.get('Content-Length')
+                const res = await fetchV2(newConfig);
+                if (timeoutId) clearTimeout(timeoutId);
+                if (!res.ok) return Promise.reject(await options.afterNotOkResponse(res, newConfig));
+                const resContentLength = res.headers.get('Content-Length');
                 const resContentType = res.headers.get('Content-Type');
                 // 'Content-Length' is not always exposed (e.g. when 'Transfer-Encoding': 'chunked')
-                if (resContentLength && resContentLength === '0') return undefined
+                if (resContentLength && resContentLength === '0') return undefined;
                 else if (resContentType && resContentType.includes('application/json')) return res.json();
                 else return res.text();
             } catch (err: any) {
-                if (timeoutId) clearTimeout(timeoutId)
-                throw await options.afterNotOkResponse(err, newConfig)
+                if (timeoutId) clearTimeout(timeoutId);
+                throw await options.afterNotOkResponse(err, newConfig);
             }
-        }
-    }
+        },
+    };
 }
