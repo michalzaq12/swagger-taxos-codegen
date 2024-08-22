@@ -1,4 +1,4 @@
-${{> methodSignature}}{
+async ${{> methodSignature}}{
 
     {{#equalsLength parameters 1}}
         let path = `{{pathTemplate}}`;
@@ -23,12 +23,17 @@ ${{> methodSignature}}{
         {{/equalsLength}}
     {{/isEmpty}}
 
-    return httpClient.request({
+    try {
+        return await httpClient.request({
         url: path,
         method: '{{method}}',
         params: queryParams,
         data: data,
         ...config
-    })
+        })
+    } catch (e) {
+        // Re-throw for proper stack trace (otherwise the stack trace always points to "afterNotOkResponse")
+        throw e
+    }
 
 },
