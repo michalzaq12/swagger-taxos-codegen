@@ -2,7 +2,8 @@ import { readFileSync } from "fs";
 import * as Handlebars from "handlebars";
 import { assign } from "lodash";
 import { TemplateLocations } from "../options/options";
-import * as hbsHelper from "handlebars-helpers";
+// @ts-ignore
+import * as hbsHelper from "@budibase/handlebars-helpers";
 import { isAbsolute } from "path";
 import { PREDEFINED_TEMPLATES } from "../options/default";
 
