@@ -8,9 +8,6 @@ export interface ViewData {
     isSecure: boolean;
     imports: ReadonlyArray<string>;
     domain: string;
-    isSecureToken: boolean;
-    isSecureApiKey: boolean;
-    isSecureBasic: boolean;
     methods: Method[];
     methodsByTag: {
         [tag: string]: Method[];

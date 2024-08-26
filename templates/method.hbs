@@ -29,7 +29,12 @@ async ${{> methodSignature}}{
         method: '{{method}}',
         params: queryParams,
         data: data,
-        ...config
+        ...config,
+        opSecurity: [
+            {{#each opSecurity}}
+                '{{this}}',
+            {{/each}}
+        ]
         })
     } catch (e) {
         // Re-throw for proper stack trace (otherwise the stack trace always points to "afterNotOkResponse")

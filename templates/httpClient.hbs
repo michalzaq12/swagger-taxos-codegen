@@ -13,85 +13,86 @@ signal?: AbortSignal
 // Pass custom vars to request or error handler (not used by fetch)
 custom?: {
 [key: string]: string | boolean | number
-}
-}
+},
+opSecurity: Array<string>
+    }
 
 
-function fetchV2(config: IApiRequestConfig) {
-const url = new URL(config.url);
-if (config.params) {
-for (const [key, value] of Object.entries(config.params)) {
-// Skip invalid query params
-if (value !== undefined && value !== '' && value !== null) url.searchParams.set(key, value);
-}
-}
+    function fetchV2(config: IApiRequestConfig) {
+    const url = new URL(config.url);
+    if (config.params) {
+    for (const [key, value] of Object.entries(config.params)) {
+    // Skip invalid query params
+    if (value !== undefined && value !== '' && value !== null) url.searchParams.set(key, value);
+    }
+    }
 
-const myHeaders = new Headers();
-if (config.headers) {
-for (const [key, value] of Object.entries(config.headers)) {
-myHeaders.append(key, value)
-}
-}
+    const myHeaders = new Headers();
+    if (config.headers) {
+    for (const [key, value] of Object.entries(config.headers)) {
+    myHeaders.append(key, value)
+    }
+    }
 
-let data: undefined | string | FormData = undefined
-if (config.method.toLowerCase() !== 'get') {
-if (config.data && config.data instanceof FormData) {
-// Form Data
-myHeaders.append('Content-Type', 'multipart/form-data')
-data = config.data
-} else if (config.data && Object.keys(config.data).length > 0) {
-// Object (but not empty)
-myHeaders.append('Content-Type', 'application/json')
-data = JSON.stringify(config.data)
-}
-}
+    let data: undefined | string | FormData = undefined
+    if (config.method.toLowerCase() !== 'get') {
+    if (config.data && config.data instanceof FormData) {
+    // Form Data
+    myHeaders.append('Content-Type', 'multipart/form-data')
+    data = config.data
+    } else if (config.data && Object.keys(config.data).length > 0) {
+    // Object (but not empty)
+    myHeaders.append('Content-Type', 'application/json')
+    data = JSON.stringify(config.data)
+    }
+    }
 
-return fetch(url, {
-method: config.method,
-headers: myHeaders,
-signal: config.signal,
-body: data,
-cache: 'no-store'
-})
-}
+    return fetch(url, {
+    method: config.method,
+    headers: myHeaders,
+    signal: config.signal,
+    body: data,
+    cache: 'no-store'
+    })
+    }
 
-// NOTE: In future replace with AbortSignal.any (Chrome 116+, no Safari)
-function anySignal(signals: AbortSignal[]): AbortSignal | undefined {
-if (signals.length === 0) return undefined;
-const controller = new AbortController();
+    // NOTE: In future replace with AbortSignal.any (Chrome 116+, no Safari)
+    function anySignal(signals: AbortSignal[]): AbortSignal | undefined {
+    if (signals.length === 0) return undefined;
+    const controller = new AbortController();
 
-for (const signal of signals) {
-if (signal.aborted) {
-controller.abort();
-return signal;
-}
+    for (const signal of signals) {
+    if (signal.aborted) {
+    controller.abort();
+    return signal;
+    }
 
-signal.addEventListener('abort', () => controller.abort(signal.reason), {
-signal: controller.signal,
-});
-}
+    signal.addEventListener('abort', () => controller.abort(signal.reason), {
+    signal: controller.signal,
+    });
+    }
 
-return controller.signal;
-}
+    return controller.signal;
+    }
 
-function getTimeoutSignal (timeout: number) {
-// Use native fetch timeout when available (Chrome 103+)
-if (typeof AbortSignal.timeout === 'function') return {timeoutSignal: AbortSignal.timeout(timeout)};
-else {
-const timeoutController = new AbortController();
-const timeoutError = new Error(`Timeout of ${timeout}ms exceeded`)
-timeoutError.name = 'TimeoutError'
-return {
-timeoutSignal: timeoutController.signal,
-timeoutId: setTimeout(() => timeoutController.abort(timeoutError), timeout)
-}
-}
-}
+    function getTimeoutSignal (timeout: number) {
+    // Use native fetch timeout when available (Chrome 103+)
+    if (typeof AbortSignal.timeout === 'function') return {timeoutSignal: AbortSignal.timeout(timeout)};
+    else {
+    const timeoutController = new AbortController();
+    const timeoutError = new Error(`Timeout of ${timeout}ms exceeded`)
+    timeoutError.name = 'TimeoutError'
+    return {
+    timeoutSignal: timeoutController.signal,
+    timeoutId: setTimeout(() => timeoutController.abort(timeoutError), timeout)
+    }
+    }
+    }
 
-export interface IHttpClientOptions {
-baseURL: string
-timeout: number
-beforeRequest?: (config: IApiRequestConfig) => Promise<IApiRequestConfig>
+    export interface IHttpClientOptions {
+    baseURL: string
+    timeout: number
+    beforeRequest?: (config: IApiRequestConfig) => Promise<IApiRequestConfig>
     afterNotOkResponse: (res: Response | Error, config: IApiRequestConfig) => Promise<Error>
     }
 

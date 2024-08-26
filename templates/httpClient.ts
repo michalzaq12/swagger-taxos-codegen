@@ -13,7 +13,8 @@ export interface IApiRequestConfig {
     // Pass custom vars to request or error handler (not used by fetch)
     custom?: {
         [key: string]: string | boolean | number
-    }
+    },
+    opSecurity: Array<string>
 }
 
 

@@ -8,9 +8,6 @@ export interface Method {
     readonly intVersion: number;
     readonly isLatestVersion: boolean;
     readonly isSecure: boolean;
-    readonly isSecureToken: boolean;
-    readonly isSecureApiKey: boolean;
-    readonly isSecureBasic: boolean;
     readonly path: string;
     readonly pathTemplateForParameters: string;
     readonly pathTemplate: string;
@@ -27,8 +24,9 @@ export interface Method {
     readonly headers: Header[];
     readonly successfulResponseType: string;
     readonly successfulResponseTypeIsRef: boolean;
+    readonly opSecurity: ReadonlyArray<string>;
 }
-export declare function makeMethod(path: string, opts: CodeGenOptions, swagger: Swagger, httpVerb: string, op: HttpOperation, secureTypes: string[], globalParams: ReadonlyArray<Parameter>): Method;
+export declare function makeMethod(path: string, opts: CodeGenOptions, swagger: Swagger, httpVerb: string, op: HttpOperation, globalParams: ReadonlyArray<Parameter>): Method;
 export declare function normalizeName(id: string): string;
 export declare function getPathToMethodName(httpVerb: string, path: string): string;
 export declare function getNamespace(tag: string): string;

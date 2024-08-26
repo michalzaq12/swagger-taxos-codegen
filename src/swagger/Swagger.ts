@@ -83,7 +83,7 @@ export interface SecurityDefinition {
 
 export interface HttpOperation {
   readonly deprecated: boolean;
-  readonly security: boolean;
+  readonly security: any;
   readonly responses: {
     readonly [index: string]: SwaggerType;
   };

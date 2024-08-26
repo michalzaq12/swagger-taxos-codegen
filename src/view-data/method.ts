@@ -14,9 +14,6 @@ export interface Method {
   readonly intVersion: number;
   readonly isLatestVersion: boolean;
   readonly isSecure: boolean;
-  readonly isSecureToken: boolean;
-  readonly isSecureApiKey: boolean;
-  readonly isSecureBasic: boolean;
   readonly path: string;
   readonly pathTemplateForParameters: string;
   readonly pathTemplate: string;
@@ -33,6 +30,7 @@ export interface Method {
   readonly headers: Header[];
   readonly successfulResponseType: string;
   readonly successfulResponseTypeIsRef: boolean;
+  readonly opSecurity: ReadonlyArray<string>;
 }
 
 export function makeMethod(
@@ -41,7 +39,6 @@ export function makeMethod(
   swagger: Swagger,
   httpVerb: string,
   op: HttpOperation,
-  secureTypes: string[],
   globalParams: ReadonlyArray<Parameter>
 ): Method {
   const methodName = opts.getMethodName(op, httpVerb, path);
@@ -49,6 +46,11 @@ export function makeMethod(
     successfulResponseType,
     successfulResponseTypeIsRef
   ] = getSuccessfulResponseType(op, swagger);
+
+
+  let opSecurity : Array<string> = []
+  // Eg.: op.security =  [ { jwt: [], 'dev-only': [] } ]
+  if (op.security && Array.isArray(opSecurity)) opSecurity = Object.keys(op.security[0] || {})
 
   return {
     path,
@@ -65,9 +67,6 @@ export function makeMethod(
     summary: op.description || op.summary,
     externalDocs: op.externalDocs,
     isSecure: swagger.security !== undefined || op.security !== undefined,
-    isSecureToken: secureTypes.indexOf("oauth2") !== -1,
-    isSecureApiKey: secureTypes.indexOf("apiKey") !== -1,
-    isSecureBasic: secureTypes.indexOf("basic") !== -1,
     parameters: getParametersForMethod(globalParams, op.parameters, swagger),
     hasAllOptionalParameters: checkIfMethodHasAllOptionalParameters(
       op.parameters
@@ -78,7 +77,8 @@ export function makeMethod(
     headers: getHeadersForMethod(op, swagger),
     successfulResponseType,
     successfulResponseTypeIsRef,
-    isLatestVersion: false
+    isLatestVersion: false,
+    opSecurity
   };
 }
 
