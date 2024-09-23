@@ -111,8 +111,8 @@ opSecurity: Array<string>
     const resContentType = res.headers.get('Content-Type');
     // 'Content-Length' is not always exposed (e.g. when 'Transfer-Encoding': 'chunked')
     if (resContentLength && resContentLength === '0') return undefined;
-    else if (resContentType && resContentType.includes('application/json')) return res.json();
-    else return res.text();
+    else if (resContentType && resContentType.includes('application/json')) return await res.json();
+    else return await res.text();
     } catch (err: any) {
     if (timeoutId) clearTimeout(timeoutId);
     throw await options.afterNotOkResponse(err, newConfig);
