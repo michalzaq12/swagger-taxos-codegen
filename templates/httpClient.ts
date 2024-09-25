@@ -94,29 +94,33 @@ export interface IHttpClientOptions {
     timeout: number
     beforeRequest?: (config: IApiRequestConfig) => Promise<IApiRequestConfig>
     afterNotOkResponse: (res: Response | Error, config: IApiRequestConfig) => Promise<Error>
+    wrapRequest? <T> (request: () => Promise<T>) : Promise<T>
 }
 
 function createHttpClient(options: IHttpClientOptions) {
     return {
         async request(config: IApiRequestConfig) {
-            config.url = options.baseURL + config.url;
-            const newConfig = options.beforeRequest ? await options.beforeRequest(config) : config;
-            const {timeoutSignal, timeoutId} = getTimeoutSignal(options.timeout)
-            config.signal = config.signal ? anySignal([config.signal, timeoutSignal]) : timeoutSignal;
-            try {
-                const res = await fetchV2(newConfig);
-                if (timeoutId) clearTimeout(timeoutId);
-                if (!res.ok) return Promise.reject(await options.afterNotOkResponse(res, newConfig));
-                const resContentLength = res.headers.get('Content-Length');
-                const resContentType = res.headers.get('Content-Type');
-                // 'Content-Length' is not always exposed (e.g. when 'Transfer-Encoding': 'chunked')
-                if (resContentLength && resContentLength === '0') return undefined;
-                else if (resContentType && resContentType.includes('application/json')) return await res.json();
-                else return await res.text();
-            } catch (err: any) {
-                if (timeoutId) clearTimeout(timeoutId);
-                throw await options.afterNotOkResponse(err, newConfig);
-            }
+            const wrapper = options.wrapRequest || (request => request())
+            return wrapper(async () => {
+                config.url = options.baseURL + config.url;
+                const newConfig = options.beforeRequest ? await options.beforeRequest(config) : config;
+                const {timeoutSignal, timeoutId} = getTimeoutSignal(options.timeout)
+                config.signal = config.signal ? anySignal([config.signal, timeoutSignal]) : timeoutSignal;
+                try {
+                    const res = await fetchV2(newConfig);
+                    if (timeoutId) clearTimeout(timeoutId);
+                    if (!res.ok) return Promise.reject(await options.afterNotOkResponse(res, newConfig));
+                    const resContentLength = res.headers.get('Content-Length');
+                    const resContentType = res.headers.get('Content-Type');
+                    // 'Content-Length' is not always exposed (e.g. when 'Transfer-Encoding': 'chunked')
+                    if (resContentLength && resContentLength === '0') return undefined;
+                    else if (resContentType && resContentType.includes('application/json')) return await res.json();
+                    else return await res.text();
+                } catch (err: any) {
+                    if (timeoutId) clearTimeout(timeoutId);
+                    throw await options.afterNotOkResponse(err, newConfig);
+                }
+            })
         },
     };
 }

@@ -94,11 +94,14 @@ opSecurity: Array<string>
     timeout: number
     beforeRequest?: (config: IApiRequestConfig) => Promise<IApiRequestConfig>
     afterNotOkResponse: (res: Response | Error, config: IApiRequestConfig) => Promise<Error>
+    wrapRequest? <T> (request: () => Promise<T>) : Promise<T>
     }
 
     function createHttpClient(options: IHttpClientOptions) {
     return {
     async request(config: IApiRequestConfig) {
+    const wrapper = options.wrapRequest || (request => request())
+    return wrapper(async () => {
     config.url = options.baseURL + config.url;
     const newConfig = options.beforeRequest ? await options.beforeRequest(config) : config;
     const {timeoutSignal, timeoutId} = getTimeoutSignal(options.timeout)
@@ -117,6 +120,7 @@ opSecurity: Array<string>
     if (timeoutId) clearTimeout(timeoutId);
     throw await options.afterNotOkResponse(err, newConfig);
     }
+    })
     },
     };
     }
