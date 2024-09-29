@@ -90,26 +90,45 @@ function getTimeoutSignal (timeout: number) {
 }
 
 export interface IHttpClientOptions {
-    baseURL: string
-    timeout: number
-    beforeRequest?: (config: IApiRequestConfig) => Promise<IApiRequestConfig>
-    afterNotOkResponse: (res: Response | Error, config: IApiRequestConfig) => Promise<Error>
-    wrapRequest? <T> (request: () => Promise<T>) : Promise<T>
+    baseURL: string;
+    timeout: number;
+    beforeRequest?: (config: IApiRequestConfig) => Promise<IApiRequestConfig>;
+    afterNotOkResponse: (res: Response | Error, config: IApiRequestConfig) => Promise<Error>;
+    wrapRequest?<T>(request: () => Promise<T>, options: {userSignal?: AbortSignal}): Promise<T>;
+}
+
+function normalizeErrorStackTrace(refError: Error, exception: Error) {
+    if (!refError.stack) return exception;
+    try {
+        const stackArray = refError.stack.split('\n')
+        // Remove two first lines of stack trace
+        // - 1 line point to Object.request source
+        // - 2 line point to Object.$getDevices source (or others)
+        // Remove an additional line if browser is NOT FireFox since error stack trace start with the error name
+        // (If stacktrace contains '@' it is FireFox)
+        stackArray.splice(stackArray[0].includes('@') ? 0 : 1,2);
+        exception.stack = stackArray.join('\n');
+        return exception;
+    } catch {
+        return exception
+    }
 }
 
 function createHttpClient(options: IHttpClientOptions) {
     return {
         async request(config: IApiRequestConfig) {
-            const wrapper = options.wrapRequest || (request => request())
+            const refError = new Error('API Error - stack trace reference')
+            const wrapper = options.wrapRequest || ((request) => request());
+            const userSignal = config.signal
+            config.url = options.baseURL + config.url;
             return wrapper(async () => {
-                config.url = options.baseURL + config.url;
                 const newConfig = options.beforeRequest ? await options.beforeRequest(config) : config;
-                const {timeoutSignal, timeoutId} = getTimeoutSignal(options.timeout)
-                config.signal = config.signal ? anySignal([config.signal, timeoutSignal]) : timeoutSignal;
+                const { timeoutSignal, timeoutId } = getTimeoutSignal(options.timeout);
+                newConfig.signal = userSignal ? anySignal([userSignal, timeoutSignal]) : timeoutSignal;
                 try {
                     const res = await fetchV2(newConfig);
                     if (timeoutId) clearTimeout(timeoutId);
-                    if (!res.ok) return Promise.reject(await options.afterNotOkResponse(res, newConfig));
+                    if (!res.ok) return Promise.reject(normalizeErrorStackTrace(refError, await options.afterNotOkResponse(res, newConfig)));
                     const resContentLength = res.headers.get('Content-Length');
                     const resContentType = res.headers.get('Content-Type');
                     // 'Content-Length' is not always exposed (e.g. when 'Transfer-Encoding': 'chunked')
@@ -118,9 +137,9 @@ function createHttpClient(options: IHttpClientOptions) {
                     else return await res.text();
                 } catch (err: any) {
                     if (timeoutId) clearTimeout(timeoutId);
-                    throw await options.afterNotOkResponse(err, newConfig);
+                    throw normalizeErrorStackTrace(refError, await options.afterNotOkResponse(err, newConfig));
                 }
-            })
+            }, {userSignal});
         },
     };
 }
