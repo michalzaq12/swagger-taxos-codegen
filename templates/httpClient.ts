@@ -51,8 +51,7 @@ function fetchV2(config: IApiRequestConfig) {
         method: config.method,
         headers: myHeaders,
         signal: config.signal,
-        body: data,
-        cache: 'no-store'
+        body: data
     })
 }
 
