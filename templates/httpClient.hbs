@@ -122,11 +122,12 @@ opSecurity: Array<string>
             async request(config: IApiRequestConfig) {
             const refError = new Error('API Error - stack trace reference')
             const wrapper = options.wrapRequest || ((request) => request());
+            const userSignal = config.signal // Store userSignal outside wrapper (without this, retry will not work after a TimeoutError)
             config.url = options.baseURL + config.url;
             return wrapper(async () => {
             const newConfig = options.beforeRequest ? await options.beforeRequest(config) : config;
             const { timeoutSignal, timeoutId } = getTimeoutSignal(options.timeout);
-            newConfig.signal = config.signal ? anySignal([config.signal, timeoutSignal]) : timeoutSignal;
+            newConfig.signal = userSignal ? anySignal([userSignal, timeoutSignal]) : timeoutSignal;
             try {
             const res = await fetchV2(newConfig);
             if (timeoutId) clearTimeout(timeoutId);
