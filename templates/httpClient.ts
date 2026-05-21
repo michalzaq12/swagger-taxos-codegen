@@ -55,9 +55,13 @@ function fetchV2(config: IApiRequestConfig) {
     })
 }
 
-// NOTE: In future replace with AbortSignal.any (Chrome 116+, no Safari)
 function anySignal(signals: AbortSignal[]): AbortSignal | undefined {
     if (signals.length === 0) return undefined;
+    else if (signals.length === 1) return signals[0]
+    // @ts-ignore Use native signal combining when available
+    else if (typeof AbortSignal.any === 'function') return AbortSignal.any(signals)
+
+    // If AbortSignal.any is not available => create polyfill
     const controller = new AbortController();
 
     for (const signal of signals) {
@@ -75,7 +79,7 @@ function anySignal(signals: AbortSignal[]): AbortSignal | undefined {
 }
 
 function getTimeoutSignal (timeout: number) {
-    // Use native fetch timeout when available (Chrome 103+)
+    // Use native fetch timeout when available
     if (typeof AbortSignal.timeout === 'function') return {timeoutSignal: AbortSignal.timeout(timeout)};
     else {
         const timeoutController = new AbortController();
