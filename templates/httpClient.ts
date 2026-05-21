@@ -66,8 +66,8 @@ function anySignal(signals: AbortSignal[]): AbortSignal | undefined {
 
     for (const signal of signals) {
         if (signal.aborted) {
-            controller.abort();
-            return signal;
+            controller.abort(signal.reason);
+            return controller.signal;
         }
 
         signal.addEventListener('abort', () => controller.abort(signal.reason), {
