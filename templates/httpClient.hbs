@@ -93,7 +93,7 @@ opSecurity: Array<string>
     timeout: number;
     beforeRequest?: (config: IApiRequestConfig) => Promise<IApiRequestConfig>;
     afterNotOkResponse: (res: Response | Error, config: IApiRequestConfig) => Promise<Error>;
-        wrapRequest?<T>(request: () => Promise<T>, options: {userSignal?: AbortSignal}): Promise<T>;
+        wrapRequest?<T>(request: () => Promise<T>, config: IApiRequestConfig): Promise<T>;
             }
 
             function normalizeErrorStackTrace(refError: Error, exception: Error) {
@@ -118,12 +118,11 @@ opSecurity: Array<string>
             async request(config: IApiRequestConfig) {
             const refError = new Error('API Error - stack trace reference')
             const wrapper = options.wrapRequest || ((request) => request());
-            const userSignal = config.signal
             config.url = options.baseURL + config.url;
             return wrapper(async () => {
             const newConfig = options.beforeRequest ? await options.beforeRequest(config) : config;
             const { timeoutSignal, timeoutId } = getTimeoutSignal(options.timeout);
-            newConfig.signal = userSignal ? anySignal([userSignal, timeoutSignal]) : timeoutSignal;
+            newConfig.signal = config.signal ? anySignal([config.signal, timeoutSignal]) : timeoutSignal;
             try {
             const res = await fetchV2(newConfig);
             if (timeoutId) clearTimeout(timeoutId);
@@ -138,7 +137,7 @@ opSecurity: Array<string>
             if (timeoutId) clearTimeout(timeoutId);
             throw normalizeErrorStackTrace(refError, await options.afterNotOkResponse(err, newConfig));
             }
-            }, {userSignal});
+            }, config);
             },
             };
             }
